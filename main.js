@@ -123,10 +123,19 @@
     // We need to scale down the image or else we get HTTP 414 Errors
     // Also we scale down because of RTC message length restriction
     if ( sendReady ) {
-      var scanvas = document.createElement('canvas');
-      scanvas.width = 320;
-      scanvas.height = 240;
-      scanvas.getContext('2d').drawImage(_canvas, 0, 0, 640, 480)
+      var scanvas     = document.createElement('canvas');
+      scanvas.width   = _canvas.width;
+      scanvas.height  = _canvas.height;
+
+      var wRatio = _canvas.width / 320;
+      var hRatio = _canvas.height / 240;
+      var maxRatio = Math.max(wRatio, hRatio);
+      if ( maxRatio > 1 ) {
+        scanvas.width  = _canvas.width / maxRatio;
+        scanvas.height = _canvas.height / maxRatio;
+      }
+      scanvas.getContext('2d').drawImage(_canvas, 0, 0, scanvas.width, scanvas.height);
+
       sendChannel.send(scanvas.toDataURL("image/jpeg"));
     }
   }
