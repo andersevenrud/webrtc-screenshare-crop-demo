@@ -15,11 +15,88 @@
   var MAX_VIDEO_HEIGHT = 720;
   var _canvas;
   var _context;
+  var _preview;
+
+  var remotePeerConnection;
+  var localPeerConnection;
+  var receiveChannel;
+  var sendChannel;
+  var sendReady = false;
 
   window.navigator = window.navigator || {};
   if ( !navigator.getUserMedia ) {
     navigator.getUserMedia = (navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
   }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // CONNECTION
+  /////////////////////////////////////////////////////////////////////////////
+
+
+  /**
+   * Create RTC Connection for sending/receiving data
+   * Kudos to: http://richard.to/projects/datachannel-demo
+   */
+  function createConnection() {
+    var servers = null;
+
+    localPeerConnection = new webkitRTCPeerConnection(servers, {optional: []});
+    sendChannel = localPeerConnection.createDataChannel("sendDataChannel", {reliable: true});
+
+    localPeerConnection.onicecandidate = function gotLocalCandidate(event) {
+      if ( event.candidate ) {
+        remotePeerConnection.addIceCandidate(event.candidate);
+      }
+    };
+    sendChannel.onopen = function() {
+      var readyState = sendChannel.readyState;
+      sendReady = (readyState == "open");
+    };
+    sendChannel.onclose = function() {
+      var readyState = sendChannel.readyState;
+      sendReady = (readyState == "open");
+    };
+
+    remotePeerConnection = new webkitRTCPeerConnection(servers, {optional: []});
+    remotePeerConnection.onicecandidate = function(event) {
+      if ( event.candidate ) {
+        localPeerConnection.addIceCandidate(event.candidate);
+      }
+    };
+    remotePeerConnection.ondatachannel = function(event) {
+      receiveChannel = event.channel;
+      receiveChannel.onopen = function() {};
+      receiveChannel.onclose = function() {};
+      receiveChannel.onmessage = function(event) {
+        if ( event.data.match(/^data/) ) {
+          _preview.src = event.data;
+        }
+      };
+    };
+
+    localPeerConnection.createOffer(function(desc) {
+      localPeerConnection.setLocalDescription(desc);
+      remotePeerConnection.setRemoteDescription(desc);
+
+      remotePeerConnection.createAnswer(function(desc) {
+        remotePeerConnection.setLocalDescription(desc);
+        localPeerConnection.setRemoteDescription(desc);
+      }, null);
+    }, null);
+  }
+
+  function closeConnection() {
+    sendChannel.close();
+    receiveChannel.close();
+    localPeerConnection.close();
+    remotePeerConnection.close();
+    localPeerConnection = null;
+    remotePeerConnection = null;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // SCREEN CAPTURE
+  /////////////////////////////////////////////////////////////////////////////
 
   /**
    * Crops a video frame and shows it to the user
@@ -38,12 +115,20 @@
       _canvas.height = CROP_H;
       _context       = _canvas.getContext('2d');
 
-      document.body.appendChild(_canvas);
+      document.getElementById("LocalVideo").appendChild(_canvas);
     }
 
     _context.drawImage(video, CROP_X, CROP_Y, CROP_W, CROP_H, 0, 0, CROP_W, CROP_H);
 
-    // !!! You can send the image to other users here
+    // We need to scale down the image or else we get HTTP 414 Errors
+    // Also we scale down because of RTC message length restriction
+    if ( sendReady ) {
+      var scanvas = document.createElement('canvas');
+      scanvas.width = 320;
+      scanvas.height = 240;
+      scanvas.getContext('2d').drawImage(_canvas, 0, 0, 640, 480)
+      sendChannel.send(scanvas.toDataURL("image/jpeg"));
+    }
   }
 
   /**
@@ -90,9 +175,10 @@
     return video;
   }
 
-  //
+  /////////////////////////////////////////////////////////////////////////////
   // MAIN
-  //
+  /////////////////////////////////////////////////////////////////////////////
+
   window.onload = function() {
     // Form elements
     document.getElementById("x").value = CROP_X;
@@ -124,6 +210,11 @@
         _context = null;
       }
     });
+
+    // Connection
+    _preview = document.getElementById("RemoteVideoImage");
+
+    createConnection();
 
     // Create capture
     CreateCaptureDevice(function(stream, video) {
