@@ -2,6 +2,8 @@
 
 This is an example on how to crop (select a section) WebRTC screen sharing in Chrome
 
+Live action demo is located [here](https://andersevenrud.github.io/webrtc-screenshare-crop/)
+
 ## How to enable screen sharing
 
 You have to enable `Enable screen capture support in getUserMedia` in [chrome://flags/#enable-usermedia-screen-capture](chrome://flags/#enable-usermedia-screen-capture)
