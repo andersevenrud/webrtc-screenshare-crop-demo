@@ -2,34 +2,13 @@
 <html>
   <head>
     <script type="text/javascript" src="main.js"></script>
-    <style type="text/css">
-#ga {
-  position : absolute;
-  bottom : 5px;
-  left : 5px;
-  z-index : -1;
-}
-    </style>
-
     <link rel="author" href="https://plus.google.com/101576798387217383063?rel=author" />
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-35975596-1']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>
   </head>
   <body>
     <h1>WebRTC Cropped Screen Sharing example</h1>
     <p>
-      This is just an example on how to crop the screen capture in WebRTC for <b>Chrome</b>.
+      This is just an example on how to crop the screen capture in WebRTC for <b>Chrome</b>. <a href="https://github.com/andersevenrud/webrtc-screenshare-crop-demo">View source on GitHub</a>
     </p>
     <p>
       <b>
@@ -70,7 +49,9 @@
       <img id="RemoteVideoImage" src="" alt="" />
     </div>
 
-    <div id="ga">
+
+    <!-- Google stuff -->
+    <div style="position:fixed;bottom:0px;right:0px;">
       <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
       <ins class="adsbygoogle"
            style="display:inline-block;width:728px;height:15px"
@@ -78,5 +59,17 @@
            data-ad-slot="1695909198"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-35975596-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
   </body>
 </html>
