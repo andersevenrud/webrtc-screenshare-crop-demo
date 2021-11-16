@@ -39,6 +39,9 @@
    */
   function createConnection() {
     var servers = null;
+    var onError = function(error) {
+        console.error(error);
+    };
 
     localPeerConnection = new webkitRTCPeerConnection(servers, {optional: []});
     sendChannel = localPeerConnection.createDataChannel("sendDataChannel", {reliable: true});
@@ -81,8 +84,8 @@
       remotePeerConnection.createAnswer(function(desc) {
         remotePeerConnection.setLocalDescription(desc);
         localPeerConnection.setRemoteDescription(desc);
-      }, null);
-    }, null);
+      }, onError);
+    }, onError);
   }
 
   function closeConnection() {
